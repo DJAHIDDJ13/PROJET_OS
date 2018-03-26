@@ -1,3 +1,5 @@
+#ifndef GES_FICH
+#define GES_FICH
 typedef struct {
 	int mise; 
 	char type; // - + ou *
@@ -19,3 +21,4 @@ typedef struct {
 
 infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur);
 infoJeu lireEntree(FILE* fichier);
+#endif

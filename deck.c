@@ -10,9 +10,7 @@ void initDeckLib () {
 	srand (time (NULL));
 }
 
-deck_t * initDeck (
-	const decktype_t type,
-	const int nbPacks) {
+deck_t * initDeck (const decktype_t type, const int nbPacks) {
 	deck_t * deck;
 	card_t * tmp;
 	int i, j;

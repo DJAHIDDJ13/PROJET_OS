@@ -1,4 +1,6 @@
-main:clean gestionEntree.o main.o deck.o
+
+
+main:gestionEntree.o main.o deck.o
 	gcc -g -Wall main.o gestionEntree.o deck.o -o main
 
 main.o: main.c

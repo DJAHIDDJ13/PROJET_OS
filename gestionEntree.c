@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "gestionEntree.h"
-
+#include <ctype.h>
 infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur){
 	if(strchr(buf, '+') || strchr(buf, '-')){
 		if(sscanf(buf, "%d;%d%c;%d;%d", &(result.joueurs[numJoueur].nbrJetons), &(result.joueurs[numJoueur].strategie.mise),&(result.joueurs[numJoueur].strategie.type),
@@ -29,7 +29,7 @@ infoJeu lireEntree(FILE* fichier){
 	char buf[1000];
 	int cmpt = 0;
 	while((fscanf(fichier, "%s", buf)) == 1){
-		if(buf[0] != '#'){
+		if(!strchr(buf, '#')){
 			if(cmpt == 0){
 				if(sscanf(buf, "%d;%d;%d", &(result.nbrJoueurs), &(result.nbrMains), &(result.nbrDecks))<3){
 					perror("Corrupted file!\n");
