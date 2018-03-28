@@ -1,5 +1,7 @@
 #ifndef GES_FICH
 #define GES_FICH
+#include <stdio.h>
+#include <sys/types.h>
 typedef struct {
 	int mise; 
 	char type; // - + ou *

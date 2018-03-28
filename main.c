@@ -3,6 +3,7 @@
 #include "gestionEntree.h"
 #include "deck.h"
 #include "processManagment.h"
+
 int main () {
 	initDeckLib();
 	FILE* file = fopen("./fich","r");
