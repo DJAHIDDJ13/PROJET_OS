@@ -6,8 +6,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
+
+/*
 void pushCards(int* cartes, int top, deck_t *deck, int nbrOfCards){
-	for(int i=top; i<top+nbrOfCards; i++){
 		int drawn = drawCard(deck);
 		discardCard(deck, drawn);
 		cartes[i] = drawn;
@@ -107,3 +108,4 @@ void play(infoJeu info, deck_t *deck){
 		//~ }
 	//~ }
 //~ }
+*/
