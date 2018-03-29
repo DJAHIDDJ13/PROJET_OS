@@ -21,6 +21,28 @@ typedef struct {
 	joueur* joueurs;
 }infoJeu;
 
+typedef struct{
+	int *cartesJoueur;
+	int topJoueur;
+	int totalJoueur;
+	int totalBanque;
+	int *cartesBanque;
+	int topBanque;
+	int mise;
+	int gain;
+	int nbJetons;
+}roundInfo;
+
+typedef struct{
+	roundInfo* round;
+}playerInfo;
+
+typedef struct{
+	playerInfo* player;
+	
+}gameInfo;
+
+
 infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur);
-infoJeu lireEntree(FILE* fichier);
+infoJeu lireEntree(int fichier);
 #endif

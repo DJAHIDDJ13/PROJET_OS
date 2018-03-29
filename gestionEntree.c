@@ -1,8 +1,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "gestionEntree.h"
 #include <ctype.h>
+#include <unistd.h>
+#include "gestionEntree.h"
+
+
+char *line(int fd)
+{
+	char *chaine=calloc(1000,sizeof(char));
+	char c;
+	int cmpt = 0;
+	while(read(fd,&c,1) > 0 && c != '\n')
+	{
+			sprintf(chaine,"%s%c",chaine,c);
+			cmpt++;	
+	}
+	return cmpt<2?NULL:chaine;
+}
+
+
 infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur){
 	if(strchr(buf, '+') || strchr(buf, '-')){
 		if(sscanf(buf, "%d;%d%c;%d;%d", &(result.joueurs[numJoueur].nbrJetons), &(result.joueurs[numJoueur].strategie.mise),&(result.joueurs[numJoueur].strategie.type),
@@ -24,11 +41,13 @@ infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur){
 	}
 	return result;
 }
-infoJeu lireEntree(FILE* fichier){
+
+
+infoJeu lireEntree(int fichier){
 	infoJeu result;
-	char buf[1000];
+	char *buf=calloc(1000,sizeof(char));
 	int cmpt = 0;
-	while((fscanf(fichier, "%s", buf)) == 1){
+	while((buf = line(fichier)) != NULL){
 		if(!strchr(buf, '#')){
 			if(cmpt == 0){
 				if(sscanf(buf, "%d;%d;%d", &(result.nbrJoueurs), &(result.nbrMains), &(result.nbrDecks))<3){
