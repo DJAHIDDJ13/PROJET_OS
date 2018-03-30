@@ -81,7 +81,7 @@ void play(infoJeu info, deck_t *deck){
 				write(out, &sig, sizeof(int));
 				//recevoir les cartes 
 				int top;
-				int *cartes = malloc(sizeof(int) * 22);
+				int cartes[22];
 				read(in, &top, sizeof(int));
 				read(in, cartes, sizeof(int)*22);
 				//Affichage des cartes et calcul de somme
