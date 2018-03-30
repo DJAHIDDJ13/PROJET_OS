@@ -20,7 +20,6 @@ void initCards(int **cartes, int *tops, int nbrJoueurs){
 	}
 }
 void play(infoJeu info, deck_t *deck){
-	pid_t* pids = malloc(sizeof(pid_t) * info.nbrJoueurs);
 	int **cartesJoueurs = malloc(sizeof(int*) * info.nbrJoueurs);
 	for(int i=0; i<info.nbrJoueurs; i++)
 		cartesJoueurs[i] = malloc(sizeof(int) * 22); //Le plus pire cas est 22 l'as consecutifs
@@ -82,10 +81,10 @@ void play(infoJeu info, deck_t *deck){
 				write(out, &sig, sizeof(int));
 				//recevoir les cartes 
 				int top;
-				int *cartes;
+				int *cartes = malloc(sizeof(int) * 22);
 				read(in, &top, sizeof(int));
 				read(in, cartes, sizeof(int)*22);
-				//Affichage des cartes
+				//Affichage des cartes et calcul de somme
 				printf("[");
 				somme = 0;
 				for(int j=0; j<top; j++){
