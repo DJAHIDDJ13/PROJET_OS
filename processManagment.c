@@ -89,6 +89,8 @@ void play(infoJeu info, deck_t *deck){
 				}
 				//envoi de win
 				write(out, &win, sizeof(int));
+				//initialisation des cartes
+				tops[i] = 0;
 			} while(sig != -1);
 			while(wait(NULL)>=0);
 		} else {
@@ -101,9 +103,8 @@ void play(infoJeu info, deck_t *deck){
 			read(in, &info, sizeof(joueur));
 			printf("Max for %d is: %d\n",i, info.valStop);
 			int mise = info.strategie.mise;
+			printf("jet = %d\nmise = %d\n", info.nbrJetons, mise);
 			while(info.nbrJetons - mise >= 0 && info.nbrJetons < info.objJetons){
-				printf("jet = %d\n", info.nbrJetons);
-				info.nbrJetons -= mise;
 				//initialisation de la somme
 				int somme = 0;
 				while(somme <= info.valStop){
@@ -122,7 +123,8 @@ void play(infoJeu info, deck_t *deck){
 						printf("(%d,%d)%s",cartes[j], getCardValue(cartes[j]), j!=top-1?",":"");
 						somme += getCardValue(cartes[j]);
 					}
-					printf("]\n");
+					printf("]%d\n", somme);
+					
 					sleep(1);
 				}
 				//Envoi de signal d'arret de partie
@@ -131,22 +133,25 @@ void play(infoJeu info, deck_t *deck){
 				//Recevoir le win
 				int win;
 				read(in, &win, sizeof(int));
+				printf("win = %d\n", win);
 				if(win){
 					info.nbrJetons += mise;
 					mise = info.strategie.mise;
 				} else {
+					info.nbrJetons -= mise;
 					switch(info.strategie.type){
 						case '*':
 							mise = info.nbrJetons;
-							
 							break;
 						case '+':
 							mise *= 2;
 							break;
 						case '-':
 							mise /= 2;
+							mise = mise?mise:1;
 					}
 				}
+				printf("jet = %d\nmise = %d\n", info.nbrJetons, mise);
 			}
 			//Envoi de signal d'arret
 			int sig = -1;
