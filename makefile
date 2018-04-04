@@ -18,3 +18,4 @@ editeur:
 	
 clean:
 	rm -f *.o main
+
