@@ -10,7 +10,9 @@ void initDeckLib () {
 	srand (time (NULL));
 }
 
-deck_t * initDeck (const decktype_t type, const int nbPacks) {
+deck_t * initDeck (
+	const decktype_t type,
+	const int nbPacks) {
 	deck_t * deck;
 	card_t * tmp;
 	int i, j;
@@ -80,6 +82,8 @@ void removeDeck (
 		deck->handCards = tmp->next;
 		free (tmp);
 	}
+
+	free (deck);
 }
 
 void shuffleDeck (

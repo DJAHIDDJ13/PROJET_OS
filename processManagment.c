@@ -19,19 +19,22 @@ void initCards(int **cartes, int *tops, int nbrJoueurs){
 		}
 	}
 }
+int getCardValue(int cardid){
+	return getValueFromCardID(cardid)>9?10:getValueFromCardID(cardid);
+}
 void play(infoJeu info, deck_t *deck){
 	int **cartesJoueurs = malloc(sizeof(int*) * info.nbrJoueurs);
 	for(int i=0; i<info.nbrJoueurs; i++)
 		cartesJoueurs[i] = malloc(sizeof(int) * 22); //Le plus pire cas c'est 22 l'as consecutifs
 	int *tops = malloc(sizeof(int) * info.nbrJoueurs);
 	initCards(cartesJoueurs, tops, info.nbrJoueurs);
-	int topBanque = 0;
-	int cartesBanque[22];
-	int sommeBanque = 0;
-	while(sommeBanque < 16){
-		pushCard(cartesBanque, &topBanque, deck);
-		sommeBanque += cartesBanque[topBanque-1];
-	}
+	//~ int topBanque = 0;
+	//~ int cartesBanque[22];
+	int sommeBanque = 16;
+	//~ while(sommeBanque < 16){
+		//~ pushCard(cartesBanque, &topBanque, deck);
+		//~ sommeBanque += cartesBanque[topBanque-1];
+	//~ }
 	for(int i=0; i<info.nbrJoueurs; i++){
 		//Creation des pipes
 		int ChildPipe[2];
@@ -63,7 +66,7 @@ void play(infoJeu info, deck_t *deck){
 					//Recevoir signal
 					read(in, &sig, sizeof(int));
 					printf("sig = %d\n", sig);
-					if(sig){
+					if(sig == 1){
 						//piochement
 						pushCard(cartesJoueurs[i], tops+i, deck);
 						//envoi des cartes
@@ -74,7 +77,7 @@ void play(infoJeu info, deck_t *deck){
 				//calcul de win
 				int sommeJoueur = 0;
 				for(int j=0; j<tops[i]; j++){
-					sommeJoueur += getValueFromCardID(cartesJoueurs[i][j])>9?10:getValueFromCardID(cartesJoueurs[i][j]);
+					sommeJoueur += getCardValue(cartesJoueurs[i][j]);
 				}
 				int win;
 				if(sommeJoueur > 21){
@@ -98,7 +101,8 @@ void play(infoJeu info, deck_t *deck){
 			read(in, &info, sizeof(joueur));
 			printf("Max for %d is: %d\n",i, info.valStop);
 			int mise = info.strategie.mise;
-			while(info.nbrJetons - mise < 0 && info.nbrJetons < info.objJetons){
+			while(info.nbrJetons - mise >= 0 && info.nbrJetons < info.objJetons){
+				printf("jet = %d\n", info.nbrJetons);
 				info.nbrJetons -= mise;
 				//initialisation de la somme
 				int somme = 0;
@@ -115,10 +119,11 @@ void play(infoJeu info, deck_t *deck){
 					printf("[");
 					somme = 0;
 					for(int j=0; j<top; j++){
-						printf("(%d,%d)%s",cartes[j], getValueFromCardID(cartes[j])>9?10:getValueFromCardID(cartes[j]), j!=top-1?",":"");
-						somme += getValueFromCardID(cartes[j])>9?10:getValueFromCardID(cartes[j]);
+						printf("(%d,%d)%s",cartes[j], getCardValue(cartes[j]), j!=top-1?",":"");
+						somme += getCardValue(cartes[j]);
 					}
 					printf("]\n");
+					sleep(1);
 				}
 				//Envoi de signal d'arret de partie
 				int sig = 0;

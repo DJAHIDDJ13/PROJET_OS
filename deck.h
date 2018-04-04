@@ -74,6 +74,7 @@ void shuffleDeck (deck_t * deck);
 // \return					Identifiant de la carte piochée, -1 si la pioche est vide
 int drawCard (deck_t * deck);
 // Mise d'une carte dans la défausse
+// La carte est prise de la pile des cartes en cours d'utilisation, si possible
 // \param	deck			Deck où la défausse est effectuée
 // \param	cardid			Identifiant de la carte défaussée
 void discardCard (deck_t * deck, const int cardid);
