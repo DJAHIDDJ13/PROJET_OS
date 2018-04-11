@@ -13,7 +13,7 @@ int main () {
 	initDeckLib();
 	int  file = open("./fich",0);
 	infoJeu info = lireEntree(file);
-	deck_t* deck = initDeck(1, info.nbrDecks);
+	deck_t* deck = initDeck(1, info.nbrDecks*4);
 	shuffleDeck(deck);
 	play(info, deck);
 	removeDeck(deck);
