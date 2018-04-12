@@ -30,6 +30,100 @@ int somme(int *t, int tot){
 	}
 	return s;
 }
+void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJoueurs, int* tops){
+	int* playerStop = malloc(sizeof(int)*info.nbrJoueurs);
+	for(int i=0; i<info.nbrJoueurs; i++){
+		playerStop[i] = 0;
+	}
+	while(somme(playerStop, info.nbrJoueurs) < info.nbrJoueurs){
+		//sending start signal
+		for(int i=0; i<info.nbrJoueurs; i++){
+			int sigP = 1;
+			if(playerStop[i] == 0)
+				write(outP[i], &sigP, sizeof(int));
+		}
+		//starting a round
+		printf("\n");
+		//initializing cards
+		for(int i=0; i<info.nbrJoueurs; i++){
+			tops[i] = 0;
+		}
+		int topBanque = 0;
+		int cartesBanque[22];
+		for(int i=0; i<info.nbrJoueurs; i++){
+			pushCard(cartesJoueurs[i], tops+i, deck);
+		}
+		pushCard(cartesBanque, &topBanque, deck);
+		for(int i=0; i<info.nbrJoueurs; i++){
+			pushCard(cartesJoueurs[i], tops+i, deck);
+		}
+		int* sigs = malloc(sizeof(int)*info.nbrJoueurs);
+		for(int i=0; i<info.nbrJoueurs ; i++) {
+			if(playerStop[i] == 0) {
+				// start drawing for each active player
+				do{
+					//Recevoir signal
+					read(inP[i], sigs+i, sizeof(int));
+					//~ printf("sig de %d = %d\n",i, sig);
+					if(sigs[i] == 1){
+						//piochement
+						pushCard(cartesJoueurs[i], tops+i, deck);
+						//envoi des cartes
+						write(outP[i], tops+i, sizeof(int));
+						write(outP[i], cartesJoueurs[i], sizeof(int) * 22);
+					}
+				} while(sigs[i] == 1);
+			}
+		}
+		int endGame = 0;
+		for(int i=0; i<info.nbrJoueurs; i++)
+			if(sigs[i] == 2)
+				endGame = 1;
+		if(!endGame)
+			break;
+		//bank's turn
+		int sommeBanque = 0;
+		while(sommeBanque <= 16){
+			pushCard(cartesBanque, &topBanque, deck);
+			sommeBanque = 0;
+			for(int i=0; i<topBanque; i++){
+				sommeBanque += getCardValue(cartesBanque[i]);
+			}
+		}
+		printf("banque = %d\n", sommeBanque);
+		for(int i=0; i<info.nbrJoueurs; i++){
+			if(sigs[i] == 2){
+				//calcul de win
+				int sommeJoueur = 0;
+				for(int j=0; j<tops[i]; j++){
+					sommeJoueur += getCardValue(cartesJoueurs[i][j]);
+				}
+				int win;
+				if(sommeJoueur > 21){
+					win = 0;
+				} else {
+					if(sommeBanque > 21){
+						win = 1;
+					} else {
+						if(sommeJoueur == sommeBanque){
+							win = -1;
+						} else if(sommeJoueur > sommeBanque){
+							win = 1;
+						} else {
+							win = 0;
+						}
+					}
+				}
+				//envoi de win
+				write(outP[i], &win, sizeof(int));
+			} else {
+				playerStop[i] = 1;
+				//calcul gain et ecriture dans fichier TODO
+			}
+		}
+	}
+}
+
 void play(infoJeu info, deck_t *deck){
 	int **cartesJoueurs = malloc(sizeof(int*) * info.nbrJoueurs);
 	for(int i=0; i<info.nbrJoueurs; i++)
@@ -88,20 +182,16 @@ void play(infoJeu info, deck_t *deck){
 						//recevoir les cartes 
 						read(in, &top, sizeof(int));
 						read(in, cartes, sizeof(int)*22);
-						//calcul de somme
+						//affichage et calcul de somme
 						somme = 0;
+						printf("joueur n:%d[", i);
 						for(int j=0; j<top; j++){
+							printf("(%d,%d)%s",cartes[j], getCardValue(cartes[j]), j!=top-1?",":"");
 							somme += getCardValue(cartes[j]);
 						}
+						printf("]%d,jet%d,mis%d\n", somme,info.nbrJetons, mise);
 						//~ sleep(1);
 					}
-					//affichage
-					printf("joueur n:%d[", i);
-					for(int j=0; j<top; j++){
-						printf("(%d,%d)%s",cartes[j], getCardValue(cartes[j]), j!=top-1?",":"");
-					}
-					printf("]%d,jet%d,mis%d\n", somme,info.nbrJetons, mise);
-
 					//Envoi de signal d'arret de partie
 					int sig = 2;
 					write(out, &sig, sizeof(int));
@@ -135,91 +225,7 @@ void play(infoJeu info, deck_t *deck){
 			exit(0);
 		}
 	}
-	int* playerStop = malloc(sizeof(int)*info.nbrJoueurs);
-	for(int i=0; i<info.nbrJoueurs; i++){
-		playerStop[i] = 0;
-	}
-	while(somme(playerStop, info.nbrJoueurs) < info.nbrJoueurs){
-		//sending start signal
-		for(int i=0; i<info.nbrJoueurs; i++){
-			int sigP = 1;
-			if(playerStop[i] == 0)
-				write(outP[i], &sigP, sizeof(int));
-		}
-		//starting a round
-		printf("\nstarting round\n");
-		//initializing cards
-		for(int i=0; i<info.nbrJoueurs; i++){
-			tops[i] = 0;
-		}
-		int topBanque = 0;
-		int cartesBanque[22];
-		for(int i=0; i<info.nbrJoueurs; i++){
-			pushCard(cartesJoueurs[i], tops+i, deck);
-		}
-		pushCard(cartesBanque, &topBanque, deck);
-		for(int i=0; i<info.nbrJoueurs; i++){
-			pushCard(cartesJoueurs[i], tops+i, deck);
-		}
-		int* sigs = malloc(sizeof(int)*info.nbrJoueurs);
-		for(int i=0; i<info.nbrJoueurs ; i++) {
-			if(playerStop[i] == 0) {
-				// start drawing for each active player
-				do{
-					//Recevoir signal
-					read(inP[i], sigs+i, sizeof(int));
-					//~ printf("sig de %d = %d\n",i, sig);
-					if(sigs[i] == 1){
-						//piochement
-						pushCard(cartesJoueurs[i], tops+i, deck);
-						//envoi des cartes
-						write(outP[i], tops+i, sizeof(int));
-						write(outP[i], cartesJoueurs[i], sizeof(int) * 22);
-					}
-				} while(sigs[i] == 1);
-			}
-		}
-		//bank's turn
-		int sommeBanque = 0;
-		while(sommeBanque <= 16){
-			pushCard(cartesBanque, &topBanque, deck);
-			sommeBanque = 0;
-			for(int i=0; i<topBanque; i++){
-				sommeBanque += getCardValue(cartesBanque[i]);
-			}
-		}
-		printf("banque = %d\n", sommeBanque);
-		for(int i=0; i<info.nbrJoueurs; i++){
-			if(sigs[i] == 2){
-				//calcul de win
-				int sommeJoueur = 0;
-				for(int j=0; j<tops[i]; j++){
-					sommeJoueur += getCardValue(cartesJoueurs[i][j]);
-				}
-				int win;
-				if(sommeJoueur > 21){
-					win = 0;
-				} else {
-					if(sommeBanque > 21){
-						win = 1;
-					} else {
-						if(sommeJoueur == sommeBanque){
-							win = -1;
-						} else if(sommeJoueur > sommeBanque){
-							win = 1;
-						} else {
-							win = 0;
-						}
-					}
-				}
-				//envoi de win
-				write(outP[i], &win, sizeof(int));
-			} else {
-				playerStop[i] = 1;
-				//calcul gain et ecriture dans fichier TODO
-			}
-		}
-	}
+	playBanque(info, deck, outP, inP, cartesJoueurs, tops);
 }
 //~ void play(infoJeu info, deck_t *deck){
 	//~ for(int i=0; i<info.nbrJoueurs; i++){
