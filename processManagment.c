@@ -75,12 +75,14 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 				} while(sigs[i] == 1);
 			}
 		}
-		int endGame = 0;
+		int endGame = 1;
 		for(int i=0; i<info.nbrJoueurs; i++)
 			if(sigs[i] == 2)
-				endGame = 1;
-		if(!endGame)
+				endGame = 0;
+		if(endGame){
+			printf("Ended game with %d\n", somme(playerStop, info.nbrJoueurs));
 			break;
+		}
 		//bank's turn
 		int sommeBanque = 0;
 		while(sommeBanque <= 16){
@@ -123,7 +125,67 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 		}
 	}
 }
+void playJoueur(joueur info, int in, int out, int i){
+	// debut de jeu
+	int mise = info.strategie.mise;
+	while(info.nbrJetons - mise >= 0 && info.nbrJetons < info.objJetons) {
+		//wait for start signal
+		int sigP = 0;
+		read(in, &sigP, sizeof(int));
+		if(sigP){
+			//initialisation de la somme
+			int somme = 0;
+			int top;
+			int cartes[22];
+			while(somme < info.valStop){
+				//Envoi de signal
+				int sig = 1;
+				write(out, &sig, sizeof(int));
+				//recevoir les cartes 
+				read(in, &top, sizeof(int));
+				read(in, cartes, sizeof(int)*22);
+				//affichage et calcul de somme
+				somme = 0;
+				printf("joueur n:%d[", i);
+				for(int j=0; j<top; j++){
+					printf("(%d,%d)%s",cartes[j], getCardValue(cartes[j]), j!=top-1?",":"");
+					somme += getCardValue(cartes[j]);
+				}
+				printf("]%d,jet%d,mis%d\n", somme,info.nbrJetons, mise);
+				//~ sleep(1);
+			}
+			//Envoi de signal d'arret de partie
+			int sig = 2;
+			write(out, &sig, sizeof(int));
+			//Recevoir le win
+			int win;
+			read(in, &win, sizeof(int));
+			//~ printf("win de %d = %d\n",i, win);
+			if(win == 1){
+				info.nbrJetons += mise;
+				mise = info.strategie.mise;
+			} else if(win == 0) {
+				info.nbrJetons -= mise;
+				switch(info.strategie.type){
+					case '*':
+						mise = info.strategie.mise;
+						break;
+					case '+':
+						mise *= 2;
+						break;
+					case '-':
+						mise /= 2;
+						mise = mise?mise:1;
+				}
+			}
+			//~ printf("jet de %d = %d\nmise = %d\n",i , info.nbrJetons, mise);
+		}
+	}
+	//Envoi de signal d'arret
+	int sig = -1;
+	write(out, &sig, sizeof(int));
 
+}
 void play(infoJeu info, deck_t *deck){
 	int **cartesJoueurs = malloc(sizeof(int*) * info.nbrJoueurs);
 	for(int i=0; i<info.nbrJoueurs; i++)
@@ -164,68 +226,12 @@ void play(infoJeu info, deck_t *deck){
 			//Recevoir les information de jeu
 			joueur info;
 			read(in, &info, sizeof(joueur));
-			// debut de jeu
-			int mise = info.strategie.mise;
-			while(info.nbrJetons - mise >= 0 && info.nbrJetons < info.objJetons) {
-				//wait for start signal
-				int sigP = 0;
-				read(in, &sigP, sizeof(int));
-				if(sigP){
-					//initialisation de la somme
-					int somme = 0;
-					int top;
-					int cartes[22];
-					while(somme < info.valStop){
-						//Envoi de signal
-						int sig = 1;
-						write(out, &sig, sizeof(int));
-						//recevoir les cartes 
-						read(in, &top, sizeof(int));
-						read(in, cartes, sizeof(int)*22);
-						//affichage et calcul de somme
-						somme = 0;
-						printf("joueur n:%d[", i);
-						for(int j=0; j<top; j++){
-							printf("(%d,%d)%s",cartes[j], getCardValue(cartes[j]), j!=top-1?",":"");
-							somme += getCardValue(cartes[j]);
-						}
-						printf("]%d,jet%d,mis%d\n", somme,info.nbrJetons, mise);
-						//~ sleep(1);
-					}
-					//Envoi de signal d'arret de partie
-					int sig = 2;
-					write(out, &sig, sizeof(int));
-					//Recevoir le win
-					int win;
-					read(in, &win, sizeof(int));
-					//~ printf("win de %d = %d\n",i, win);
-					if(win == 1){
-						info.nbrJetons += mise;
-						mise = info.strategie.mise;
-					} else if(win == 0) {
-						info.nbrJetons -= mise;
-						switch(info.strategie.type){
-							case '*':
-								mise = info.strategie.mise;
-								break;
-							case '+':
-								mise *= 2;
-								break;
-							case '-':
-								mise /= 2;
-								mise = mise?mise:1;
-						}
-					}
-					//~ printf("jet de %d = %d\nmise = %d\n",i , info.nbrJetons, mise);
-				}
-			}
-			//Envoi de signal d'arret
-			int sig = -1;
-			write(out, &sig, sizeof(int));
+			playJoueur(info, in, out, i);
 			exit(0);
 		}
 	}
 	playBanque(info, deck, outP, inP, cartesJoueurs, tops);
+	printf("OUT\n");
 }
 //~ void play(infoJeu info, deck_t *deck){
 	//~ for(int i=0; i<info.nbrJoueurs; i++){
