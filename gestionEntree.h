@@ -39,7 +39,6 @@ typedef struct{
 
 typedef struct{
 	playerInfo* player;
-	
 }gameInfo;
 
 

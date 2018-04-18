@@ -16,13 +16,17 @@ char *line(int fd)
 			sprintf(chaine,"%s%c",chaine,c);
 			cmpt++;	
 	}
+	if(cmpt<2)
+		free(chaine);
 	return cmpt<2?NULL:chaine;
 }
 
 
 infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur){
 	if(strchr(buf, '+') || strchr(buf, '-')){
-		if(sscanf(buf, "%d;%d%c;%d;%d", &(result.joueurs[numJoueur].nbrJetons), &(result.joueurs[numJoueur].strategie.mise),&(result.joueurs[numJoueur].strategie.type),
+		if(sscanf(buf, "%d;%d%c;%d;%d", &(result.joueurs[numJoueur].nbrJetons),
+		                              &(result.joueurs[numJoueur].strategie.mise),
+		                              &(result.joueurs[numJoueur].strategie.type),
 									  &(result.joueurs[numJoueur].valStop),
 									  &(result.joueurs[numJoueur].objJetons))<4)
 		{
@@ -30,7 +34,8 @@ infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur){
 			exit(-1);
 		}
 	} else {
-		if(sscanf(buf, "%d;%d;%d;%d", &(result.joueurs[numJoueur].nbrJetons), &(result.joueurs[numJoueur].strategie.mise),
+		if(sscanf(buf, "%d;%d;%d;%d", &(result.joueurs[numJoueur].nbrJetons), 
+		                              &(result.joueurs[numJoueur].strategie.mise),
 									  &(result.joueurs[numJoueur].valStop),
 									  &(result.joueurs[numJoueur].objJetons))<4)
 		{
@@ -45,16 +50,16 @@ infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur){
 
 infoJeu lireEntree(int fichier){
 	infoJeu result;
-	char *buf=calloc(1000,sizeof(char));
+	char *buf;
 	int cmpt = 0;
 	while((buf = line(fichier)) != NULL){
 		if(!strchr(buf, '#')){
 			if(cmpt == 0){
-				if(sscanf(buf, "%d;%d;%d", &(result.nbrJoueurs), &(result.nbrMains), &(result.nbrDecks))<3){
+				if(sscanf(buf, "%d;%d;%d", &(result.nbrJoueurs), &(result.nbrDecks), &(result.nbrMains))<3){
 					perror("Corrupted file!\n");
 					exit(-1);
 				}
-				result.joueurs = malloc(sizeof(joueur) * result.nbrJoueurs);
+				result.joueurs = calloc(result.nbrJoueurs, sizeof(joueur));
 			} else {
 				if(result.nbrJoueurs-cmpt>=0){
 					result = lireEntreeJoueur(buf, result, cmpt-1);
@@ -65,6 +70,7 @@ infoJeu lireEntree(int fichier){
 			}
 			cmpt ++;
 		}
+		free(buf);
 	}
 	return result;
 }
