@@ -37,10 +37,6 @@ typedef struct{
 	roundInfo* round;
 }playerInfo;
 
-typedef struct{
-	playerInfo* player;
-}gameInfo;
-
 
 infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur);
 infoJeu lireEntree(int fichier);

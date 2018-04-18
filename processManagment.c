@@ -31,8 +31,8 @@ int somme(int *t, int tot){
 	}
 	return s;
 }
+
 void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJoueurs, int* tops){
-	
 	int* playerStop = malloc(sizeof(int)*info.nbrJoueurs);
 	for(int i=0; i<info.nbrJoueurs; i++){
 		playerStop[i] = 0;
@@ -122,8 +122,6 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 				}
 				//envoi de win
 				write(outP[i], &win, sizeof(int));
-				//ecriture dans structure de journalisation
-				
 			} else {
 				playerStop[i] = 1;
 				//calcul gain et ecriture dans fichier TODO
@@ -139,7 +137,7 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 			write(outP[i], &sigP, sizeof(int));
 	}
 
-	// freeing playerStop
+	// freeing memory
 	free(playerStop);
 }
 void playJoueur(joueur info, int in, int out, int i){
