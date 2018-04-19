@@ -2,6 +2,8 @@
 #define GES_FICH
 #include <stdio.h>
 #include <sys/types.h>
+
+
 typedef struct {
 	int mise; 
 	char type; // - + ou *
@@ -35,14 +37,15 @@ typedef struct{
 
 typedef struct{
 	roundInfo* round;
+	int nbrRounds;
 }playerInfo;
 
 typedef struct{
 	playerInfo* player;
-	
 }gameInfo;
 
 
 infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur);
 infoJeu lireEntree(int fichier);
+void ecritureFichierSortie(playerInfo inforound,int i);
 #endif
