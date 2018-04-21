@@ -33,6 +33,8 @@ int somme(int *t, int tot){
 }
 
 void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJoueurs, int* tops){
+	int* mises = malloc(sizeof(int)*info.nbrJoueurs);
+	int* jetons = malloc(sizeof(int)*info.nbrJoueurs);
 	int* playerStop = malloc(sizeof(int)*info.nbrJoueurs);
 	for(int i=0; i<info.nbrJoueurs; i++){
 		playerStop[i] = 0;
@@ -42,8 +44,12 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 		//sending start signal
 		for(int i=0; i<info.nbrJoueurs; i++){
 			int sigP = 1;
-			if(playerStop[i] == 0)
+			if(playerStop[i] == 0){
 				write(outP[i], &sigP, sizeof(int));
+				read(inP[i], &mises[i], sizeof(int));
+				read(inP[i], &jetons[i], sizeof(int));
+				printf("%d %d\n", mises[i], jetons[i]);
+			}
 		}
 		//starting a round
 		printf("\n");
@@ -138,7 +144,28 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 	}
 
 	// freeing memory
+	free(mises);
+	free(jetons);
 	free(playerStop);
+}
+void update_mise_jetons(int win ,int *mise, int *jetons, strat str){
+	if(win == 1){
+		*jetons += *mise;
+		*mise = str.mise;
+	} else if(win == 0) {
+		*jetons -= *mise;
+		switch(str.type){
+			case '*':
+				*mise = str.mise;
+				break;
+			case '+':
+				*mise *= 2;
+				break;
+			case '-':
+				*mise /= 2;
+				*mise = *mise?*mise:1;
+		}
+	}	
 }
 void playJoueur(joueur info, int in, int out, int i){
 	// debut de jeu
@@ -148,6 +175,8 @@ void playJoueur(joueur info, int in, int out, int i){
 		int sigP = 0;
 		read(in, &sigP, sizeof(int));
 		if(sigP == 1){
+			write(out, &mise, sizeof(int));
+			write(out, &info.nbrJetons, sizeof(int));
 			//initialisation de la somme
 			int somme = 0;
 			int top;
@@ -174,24 +203,7 @@ void playJoueur(joueur info, int in, int out, int i){
 			//Recevoir le win
 			int win;
 			read(in, &win, sizeof(int));
-			if(win == 1){
-				info.nbrJetons += mise;
-				mise = info.strategie.mise;
-			} else if(win == 0) {
-				info.nbrJetons -= mise;
-				switch(info.strategie.type){
-					case '*':
-						mise = info.strategie.mise;
-						break;
-					case '+':
-						mise *= 2;
-						break;
-					case '-':
-						mise /= 2;
-						mise = mise?mise:1;
-				}
-			}
-			//~ printf("jet de %d = %d\nmise = %d\n",i , info.nbrJetons, mise);
+			update_mise_jetons(win, &mise, &info.nbrJetons, info.strategie);
 		} else if(sigP == -1){
 			break;
 		}
@@ -206,8 +218,9 @@ void play(infoJeu info, deck_t *deck){
 	for(int i=0; i<info.nbrJoueurs; i++)
 		cartesJoueurs[i] = malloc(sizeof(int) * 22); //Le plus pire cas c'est 22 l'as consecutifs
 	int *tops = malloc(sizeof(int) * info.nbrJoueurs);
-	// initiali
+	// initialisations des cartes
 	initCards(cartesJoueurs, tops, info.nbrJoueurs);
+	// allocation des pipes
 	int **ChildPipe = malloc(sizeof(int*)*info.nbrJoueurs);
 	int **ParentPipe = malloc(sizeof(int*)*info.nbrJoueurs);
 	int *inP = malloc(sizeof(int)*info.nbrJoueurs);
@@ -242,13 +255,15 @@ void play(infoJeu info, deck_t *deck){
 			//Recevoir les information de jeu
 			joueur info;
 			read(in, &info, sizeof(joueur));
+			//L'execution principal de joueur
 			playJoueur(info, in, out, i);
 			exit(0);
 		}
 	}
+	//l'execution pricipal de la banque
 	playBanque(info, deck, outP, inP, cartesJoueurs, tops);
 	printf("OUT\n");
-	//Freeing memory
+	//deallocation de memoire
 	for(int i=0; i<info.nbrJoueurs; i++){
 		free(cartesJoueurs[i]);
 		free(ChildPipe[i]);
