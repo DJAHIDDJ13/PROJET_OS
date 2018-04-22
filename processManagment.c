@@ -35,6 +35,11 @@ int somme(int *t, int tot){
 void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJoueurs, int* tops){
 	int* mises = malloc(sizeof(int)*info.nbrJoueurs);
 	int* jetons = malloc(sizeof(int)*info.nbrJoueurs);
+	playerInfo *journal = malloc(sizeof(playerInfo) * info.nbrJoueurs);
+	for(int i=0; i<info.nbrJoueurs; i++){
+		journal[i].round = malloc(sizeof(roundInfo) * info.nbrMains);
+		journal[i].nbrRounds = 0;
+	}
 	int* playerStop = malloc(sizeof(int)*info.nbrJoueurs);
 	for(int i=0; i<info.nbrJoueurs; i++){
 		playerStop[i] = 0;
@@ -48,7 +53,7 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 				write(outP[i], &sigP, sizeof(int));
 				read(inP[i], &mises[i], sizeof(int));
 				read(inP[i], &jetons[i], sizeof(int));
-				printf("%d %d\n", mises[i], jetons[i]);
+				//printf("%d %d\n", mises[i], jetons[i]);
 			}
 		}
 		//starting a round
@@ -84,10 +89,14 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 				} while(sigs[i] == 1);
 			}
 		}
-		int endGame = 1;
 		for(int i=0; i<info.nbrJoueurs; i++)
+			if(sigs[i] <= 0)
+				playerStop[i] = 1;
+		int endGame = 1;
+		for(int i=0; i<info.nbrJoueurs; i++){
 			if(sigs[i] == 2)
 				endGame = 0;
+		}
 		if(endGame){
 			printf("Ended game with %d\n", somme(playerStop, info.nbrJoueurs));
 			free(sigs);
@@ -128,21 +137,39 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 				}
 				//envoi de win
 				write(outP[i], &win, sizeof(int));
+				journal[i].round[journal[i].nbrRounds].mise = mises[i];
+				journal[i].round[journal[i].nbrRounds].nbJetons = jetons[i];				
+				journal[i].round[journal[i].nbrRounds].topJoueur = tops[i];				
+				journal[i].round[journal[i].nbrRounds].cartesJoueur = malloc(sizeof(int) * 22);
+				for(int j=0; j<tops[i]; j++){
+					journal[i].round[journal[i].nbrRounds].cartesJoueur[j] = cartesJoueurs[i][j];
+				}
+				
+				journal[i].round[journal[i].nbrRounds].topBanque = topBanque;				
+				journal[i].round[journal[i].nbrRounds].cartesBanque = malloc(sizeof(int) * 22);
+				for(int j=0; j<topBanque; j++){
+					journal[i].round[journal[i].nbrRounds].cartesBanque[j] = cartesBanque[j];
+				}
+				journal[i].round[journal[i].nbrRounds].totalBanque = sommeBanque;				
+				journal[i].round[journal[i].nbrRounds].totalJoueur = sommeJoueur;				
+				journal[i].round[journal[i].nbrRounds].gain = win? mises[i]:0;				
+				journal[i].nbrRounds++;
 			} else {
 				playerStop[i] = 1;
-				//calcul gain et ecriture dans fichier TODO
 			}
 		}
 		free(sigs);
 		mainsJoue++;
 	}
-	//sending start signal
+	for(int i=0; i<info.nbrJoueurs; i++){
+		ecritureFichierSortie(journal[i], i);
+	}
+	//~ //sending end signal
 	for(int i=0; i<info.nbrJoueurs; i++){
 		int sigP = -1;
 		if(playerStop[i] == 0)
 			write(outP[i], &sigP, sizeof(int));
 	}
-
 	// freeing memory
 	free(mises);
 	free(jetons);

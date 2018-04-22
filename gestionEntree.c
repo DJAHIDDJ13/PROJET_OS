@@ -79,28 +79,8 @@ infoJeu lireEntree(int fichier){
 }
 
 
-/*File creationFichierSortie(int i)
-{		
-	File f;
-	f.path=malloc(sizeof(char)*30);
-	sprintf(f.path,"%s","./PlayerOutPutFile");
-	sprintf(f.path,"%s%d",f.path,i);
-	
-	f.fd = open(f.path,O_CREAT|O_WRONLY,0600);
-	if(f.fd < 0)
-	{
-		perror("error"),exit(-1);
-	}
-	//write(f.fd,chaine,strlen(chaine));
-	close(f.fd);	
-	//free(f.path);
-	return f;
-}*/
-
-
 char cardIdToCard(int value){
-	switch (value % 13) 
-	{
+	switch (value % 13) {
 		case 0: return 'A';
 		case 9: return 'X'; 
 		case 10: return 'J'; 
@@ -109,8 +89,7 @@ char cardIdToCard(int value){
 		default: return '1'+value%13;
 	}
 }
-char *cardString(int *cartes,int top)
-{
+char *cardString(int *cartes,int top){
 	char *chaine=malloc(sizeof(char)*22);
 	int i=0;
 	for(i=0;i<top;i++)
@@ -118,20 +97,18 @@ char *cardString(int *cartes,int top)
 	chaine[i] = '\0';
 	return chaine;
 }
-void ecritureFichierSortie(playerInfo inforound,int i)
-{
+void ecritureFichierSortie(playerInfo inforound,int i){
 		int fd;
 		char* path=malloc(sizeof(char)*30);
 		char *c=malloc(sizeof(char)*35);
 		sprintf(path,"./PlayerOutPutFile%d",i);
 		printf("%s\n",path);
 		fd = open(path,O_CREAT|O_WRONLY,0600);
-		if(fd<0)
-		{
-			perror("error"),exit(-1);
+		if(fd<0){
+			perror("error");
+			exit(-1);
 		}
-		for(int i=0; i<inforound.nbrRounds; i++)
-		{
+		for(int i=0; i<inforound.nbrRounds; i++){
 			sprintf(c,"%s;%d;%s;%d;%d;%d;%d",cardString(inforound.round[i].cartesJoueur,inforound.round[i].topJoueur),inforound.round[i].totalJoueur,
 			cardString(inforound.round[i].cartesBanque,inforound.round[i].topBanque),inforound.round[i].totalBanque,inforound.round[i].mise,inforound.round[i].gain,
 			inforound.round[i].nbJetons);

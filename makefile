@@ -18,4 +18,4 @@ editeur:
 	
 clean:
 	rm -f *.o main
-
+	rm -f PlayerOutPutFile*
