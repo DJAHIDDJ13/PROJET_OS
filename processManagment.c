@@ -31,6 +31,21 @@ int getCardValue(int cardid){
 	return getValueFromCardID(cardid)>9?10:getValueFromCardID(cardid);
 }
 
+int getCardsSum(int* cartes, int top){
+	int res = 0;
+	int aceCount = 0;
+	for(int i=0; i<top; i++){
+		if(cartes[i]%13)
+			res += getCardValue(cartes[i]);
+		else 
+			aceCount ++;
+	}
+	if(res + aceCount - 1 <= 10)
+		return res + aceCount + 10;
+	else
+		return res + aceCount;
+	return -1;
+}
 // pour calculer la somme d'un tableau
 // arg1: le tableau
 // arg2: l'indice jusqu a ou elle va calculer 
@@ -116,9 +131,7 @@ void initialize_round(infoJeu info, deck_t* deck, int* inP, int* outP,
 // pour calculer la valeur de win (si un joueur a gagne ou pas)
 // ret: le win
 int calc_win(int* cartesJoueur, int topJoueur, int *sommeJoueur, int sommeBanque){
-	for(int j=0; j<topJoueur; j++){
-		(*sommeJoueur) += getCardValue(cartesJoueur[j]);
-	}
+	(*sommeJoueur) = getCardsSum(cartesJoueur, topJoueur);
 	if((*sommeJoueur) > 21){
 		return 0;
 	} else {
@@ -142,10 +155,7 @@ int calc_win(int* cartesJoueur, int topJoueur, int *sommeJoueur, int sommeBanque
 void bank_turn(deck_t *deck, int* cartesBanque, int* topBanque, int *sommeBanque){
 	while((*sommeBanque) <= 16){
 		pushCard(cartesBanque, topBanque, deck);
-		(*sommeBanque) = 0;
-		for(int i=0; i<(*topBanque); i++){
-			(*sommeBanque) += getCardValue(cartesBanque[i]);
-		}
+		(*sommeBanque) = getCardsSum(cartesBanque, *topBanque);
 	}
 	printf("banque:");
 	for(int i=0; i<(*topBanque); i++)
@@ -306,11 +316,10 @@ void playJoueur(joueur info, int in, int out, int i){
 				read(in, &top, sizeof(int));
 				read(in, cartes, sizeof(int)*22);
 				//affichage et calcul de somme
-				somme = 0;
+				somme = getCardsSum(cartes, top);
 				printf("joueur%d:", i+1);
 				for(int j=0; j<top; j++){
 					printf("%c",cardIdToCard(cartes[j]));
-					somme += getCardValue(cartes[j]);
 				}
 				printf(";somme=%d,jetons=%d,mise=%d\n", somme,info.nbrJetons, mise);
 			}
