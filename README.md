@@ -6,7 +6,10 @@ pour compiler dans le dossier de projet
 >make
 
 et pour executer
->./main
+>./main [fichier]
+
+il y a un fichier-test dans le dossier de projet, donc pour tester
+>./main fichier-test
 
 pour nettoyer les executables et les fichier de sortie
 >make clean
