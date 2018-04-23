@@ -111,7 +111,11 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 				sommeBanque += getCardValue(cartesBanque[i]);
 			}
 		}
-		printf("banque = %d\n", sommeBanque);
+		
+		printf("banque:");
+		for(int i=0; i<topBanque; i++)
+			printf("%c", cardIdToCard(cartesBanque[i]));
+		printf(";somme=%d\n", sommeBanque);
 		for(int i=0; i<info.nbrJoueurs; i++){
 			if(sigs[i] == 2){
 				//calcul de win
@@ -225,12 +229,12 @@ void playJoueur(joueur info, int in, int out, int i){
 				read(in, cartes, sizeof(int)*22);
 				//affichage et calcul de somme
 				somme = 0;
-				printf("joueur n:%d[", i);
+				printf("joueur%d:", i+1);
 				for(int j=0; j<top; j++){
-					printf("(%d,%d)%s",cartes[j], getCardValue(cartes[j]), j!=top-1?",":"");
+					printf("%c",cardIdToCard(cartes[j]));
 					somme += getCardValue(cartes[j]);
 				}
-				printf("]%d,jet%d,mis%d\n", somme,info.nbrJetons, mise);
+				printf(";somme=%d,jetons=%d,mise=%d\n", somme,info.nbrJetons, mise);
 			}
 			//Envoi de signal d'arret de partie
 			int sig = 2;

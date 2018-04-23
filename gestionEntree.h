@@ -47,5 +47,6 @@ typedef struct{
 infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur);
 infoJeu lireEntree(int fichier);
 char *cardString(int *cartes,int top);
+char cardIdToCard(int value);
 void ecritureFichierSortie(playerInfo inforound,int i);
 #endif

@@ -1,4 +1,4 @@
-for i in $(ps | grep main | grep -P '^\s*\d+' -o); do
+for i in $(ps | grep blackjack | grep -P '^\s*\d+' -o); do
 	kill $i;
 	echo killed $i;
 done;

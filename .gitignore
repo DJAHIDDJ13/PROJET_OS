@@ -1,5 +1,6 @@
 # main executable
 blackjack
+PlayerOutPutFile*
 
 # Prerequisites
 *.d
