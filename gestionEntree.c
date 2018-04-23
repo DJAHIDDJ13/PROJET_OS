@@ -102,17 +102,26 @@ void ecritureFichierSortie(playerInfo inforound,int i){
 		char* path=malloc(sizeof(char)*30);
 		char *c=malloc(sizeof(char)*35);
 		sprintf(path,"./PlayerOutPutFile%d",i);
-		printf("%s\n",path);
-		fd = open(path,O_CREAT|O_WRONLY,0600);
+		printf("writing to %s\n",path);
+		fd = open(path,O_TRUNC|O_CREAT|O_WRONLY,0600);
 		if(fd<0){
 			perror("error");
 			exit(-1);
 		}
+		write(fd, "#cartes;totalJoueur;banque;totalBanque;mise;gain;nbJetons\n", sizeof(char)*59);
 		for(int i=0; i<inforound.nbrRounds; i++){
-			sprintf(c,"%s;%d;%s;%d;%d;%d;%d",cardString(inforound.round[i].cartesJoueur,inforound.round[i].topJoueur),inforound.round[i].totalJoueur,
-			cardString(inforound.round[i].cartesBanque,inforound.round[i].topBanque),inforound.round[i].totalBanque,inforound.round[i].mise,inforound.round[i].gain,
-			inforound.round[i].nbJetons);
-			write(fd,c,strlen(c));write(fd,"\n",1);
+			char *ch1 = cardString(inforound.round[i].cartesJoueur,inforound.round[i].topJoueur);
+			char *ch2 = cardString(inforound.round[i].cartesBanque,inforound.round[i].topBanque);
+			sprintf(c,"%s;%d;%s;%d;%d;%d;%d\n", ch1,
+			                                    inforound.round[i].totalJoueur,
+		                                    	ch2,
+		                                    	inforound.round[i].totalBanque,
+		                                    	inforound.round[i].mise,
+		                                    	inforound.round[i].gain,
+												inforound.round[i].nbJetons);
+			write(fd,c,strlen(c)+1);
+			free(ch1);
+			free(ch2);
 		}
 		close(fd);
 		free(path);

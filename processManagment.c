@@ -98,7 +98,7 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 				endGame = 0;
 		}
 		if(endGame){
-			printf("Ended game with %d\n", somme(playerStop, info.nbrJoueurs));
+			printf("Ended game with %d players out\n", somme(playerStop, info.nbrJoueurs));
 			free(sigs);
 			break;
 		}
@@ -137,14 +137,14 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 				}
 				//envoi de win
 				write(outP[i], &win, sizeof(int));
+				//mise a jour journal
 				journal[i].round[journal[i].nbrRounds].mise = mises[i];
-				journal[i].round[journal[i].nbrRounds].nbJetons = jetons[i];				
+				journal[i].round[journal[i].nbrRounds].nbJetons = jetons[i]-mises[i];				
 				journal[i].round[journal[i].nbrRounds].topJoueur = tops[i];				
 				journal[i].round[journal[i].nbrRounds].cartesJoueur = malloc(sizeof(int) * 22);
 				for(int j=0; j<tops[i]; j++){
 					journal[i].round[journal[i].nbrRounds].cartesJoueur[j] = cartesJoueurs[i][j];
 				}
-				
 				journal[i].round[journal[i].nbrRounds].topBanque = topBanque;				
 				journal[i].round[journal[i].nbrRounds].cartesBanque = malloc(sizeof(int) * 22);
 				for(int j=0; j<topBanque; j++){
@@ -171,6 +171,14 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 			write(outP[i], &sigP, sizeof(int));
 	}
 	// freeing memory
+	for(int i=0; i<info.nbrJoueurs; i++){
+		for(int j=0; j<journal[i].nbrRounds; j++){
+			free(journal[i].round[j].cartesBanque);
+			free(journal[i].round[j].cartesJoueur);
+		}
+		free(journal[i].round);
+	}
+	free(journal);
 	free(mises);
 	free(jetons);
 	free(playerStop);
@@ -235,6 +243,10 @@ void playJoueur(joueur info, int in, int out, int i){
 			break;
 		}
 	}
+	int sigP = 0;
+	read(in, &sigP, sizeof(int));
+	write(out, &mise, sizeof(int));
+	write(out, &info.nbrJetons, sizeof(int));
 	//Envoi de signal d'arret
 	int sig = -1;
 	write(out, &sig, sizeof(int));
