@@ -13,7 +13,6 @@
 char *line(int fd)
 {
 	char *chaine=calloc(1000,sizeof(char));
-	if(chaine < 0) exit(-1);
 	char c;
 	int cmpt = 0;
 	while(read(fd,&c,1) > 0 && c != '\n')
@@ -137,7 +136,6 @@ void ecritureFichierSortie(playerInfo inforound,int i){
 		int fd;
 		char* path=malloc(sizeof(char)*30);
 		char *c=malloc(sizeof(char)*35);
-		if(path < 0 || c < 0) exit(-1);
 		sprintf(path,"./PlayerOutPutFile%d",i+1);
 		printf("writing to %s\n",path);
 		fd = open(path,O_TRUNC|O_CREAT|O_WRONLY,0600);
