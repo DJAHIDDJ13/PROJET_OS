@@ -8,7 +8,8 @@
 #include <fcntl.h>
 #include "gestionEntree.h"
 
-
+//fonction permettant de lire une ligne
+//arg:le descripteur du fichier
 char *line(int fd)
 {
 	char *chaine=calloc(1000,sizeof(char));
@@ -24,8 +25,12 @@ char *line(int fd)
 	return cmpt<2?NULL:chaine;
 }
 
-
+//fonction stockant les information d'un joueur 
+//arg1:buffeur contenant la ligne du joueur spécifié à l'argument 3
+//arg2:la structure qui récupère les info de ce joueur
+//arg3: le numéro du joueur concerné
 infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur){
+	//si le type de la mise est + ou -
 	if(strchr(buf, '+') || strchr(buf, '-')){
 		if(sscanf(buf, "%d;%d%c;%d;%d", &(result.joueurs[numJoueur].nbrJetons),
 		                              &(result.joueurs[numJoueur].strategie.mise),
@@ -50,7 +55,10 @@ infoJeu lireEntreeJoueur(const char *buf, infoJeu result, int numJoueur){
 	return result;
 }
 
-
+//cette fonction lit les informations d'entrées du jeu(#nbJoueurs ; nbDecks ; nbMains) et,
+//celle des joueurs (#nbJetons ; typeMise  ; valStop ; objJetons)
+//les stockes ensuite comme se doit dans la structure infojeu défini dans gestionEntree.h
+//arg:descripteur du fihcier
 infoJeu lireEntree(int fichier){
 	infoJeu result;
 	char *buf;
@@ -78,7 +86,8 @@ infoJeu lireEntree(int fichier){
 	return result;
 }
 
-
+//prend en entrée l'identifiant d'une carte,
+//return la carte associée
 char cardIdToCard(int value){
 	switch (value % 13) {
 		case 0: return 'A';
@@ -89,6 +98,9 @@ char cardIdToCard(int value){
 		default: return '1'+value%13;
 	}
 }
+//cette fonction retourne les cartes d'une main d'un joueur
+//arg1:le tableau des identifiants des cartes
+//arg2:le nombre de carte de la main
 char *cardString(int *cartes,int top){
 	char *chaine=malloc(sizeof(char)*22);
 	int i=0;
@@ -97,6 +109,11 @@ char *cardString(int *cartes,int top){
 	chaine[i] = '\0';
 	return chaine;
 }
+
+//Comme l'indique son nom, cette fonction écrit la structure playerInfo
+//dans un fichier de sortie pour chaque joueur
+//arg1:information de la main(tours,
+//arg2:l'identifiant du joueur concerné
 void ecritureFichierSortie(playerInfo inforound,int i){
 		int fd;
 		char* path=malloc(sizeof(char)*30);
@@ -110,6 +127,7 @@ void ecritureFichierSortie(playerInfo inforound,int i){
 		}
 		write(fd, "#cartes;totalJoueur;banque;totalBanque;mise;gain;nbJetons\n", sizeof(char)*59);
 		for(int i=0; i<inforound.nbrRounds; i++){
+			//transformation des identifiants des cartes en cartes(celles du joueurs et celles de la banque)
 			char *ch1 = cardString(inforound.round[i].cartesJoueur,inforound.round[i].topJoueur);
 			char *ch2 = cardString(inforound.round[i].cartesBanque,inforound.round[i].topBanque);
 			sprintf(c,"%s;%d;%s;%d;%d;%d;%d\n", ch1,
