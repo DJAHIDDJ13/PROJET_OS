@@ -87,7 +87,7 @@ infoJeu lireEntree(int fichier){
 					perror("Corrupted file!\n");
 					exit(-1);
 				}
-				if(result.joueurs = calloc(result.nbrJoueurs, sizeof(joueur))<0) exit(-1);
+				result.joueurs = calloc(result.nbrJoueurs, sizeof(joueur));
 			} else {
 				if(result.nbrJoueurs-cmpt>=0){
 					result = lireEntreeJoueur(buf, result, cmpt-1);
