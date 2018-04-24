@@ -28,7 +28,9 @@ int main (int argc, char** argv) {
 	infoJeu info = lireEntree(file);
 	deck_t* deck = initDeck(1, info.nbrDecks);
 	shuffleDeck(deck);
+	// La fonction principale
 	play(info, deck);
+	// liberation de memoire
 	free(info.joueurs);
 	removeDeck(deck);
 	close(file);

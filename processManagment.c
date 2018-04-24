@@ -97,7 +97,8 @@ void freeMemoryBank(playerInfo* journal, int* mises, int* jetons, int* playerSto
 }
 
 // pour liberer la memoire dans play
-void freeMemory(infoJeu info, int** cartesJoueurs, int **ChildPipe, int **ParentPipe, int *inP, int* outP, int *tops){
+void freeMemory(infoJeu info, int** cartesJoueurs, int **ChildPipe,
+                int **ParentPipe, int *inP, int* outP, int *tops){
 	for(int i=0; i<info.nbrJoueurs; i++){
 		free(cartesJoueurs[i]);
 		free(ChildPipe[i]);

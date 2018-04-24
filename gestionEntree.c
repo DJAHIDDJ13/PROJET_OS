@@ -13,6 +13,7 @@
 char *line(int fd)
 {
 	char *chaine=calloc(1000,sizeof(char));
+	if(chaine < 0) exit(-1);
 	char c;
 	int cmpt = 0;
 	while(read(fd,&c,1) > 0 && c != '\n')
@@ -23,6 +24,23 @@ char *line(int fd)
 	if(cmpt<2)
 		free(chaine);
 	return cmpt<2?NULL:chaine;
+}
+void checkFile(infoJeu info){
+	if(info.nbrJoueurs < 0 || info.nbrMains < 0 || info.nbrDecks < 1){
+		perror("corrupted data\n");
+		exit(-1);
+	}
+	for(int i=0; i<info.nbrJoueurs; i++){
+		if(info.joueurs[i].nbrJetons < 0 ||
+		   info.joueurs[i].objJetons < 0 || 
+		   info.joueurs[i].valStop < 0 || 
+		   info.joueurs[i].valStop > 21 ||
+		   info.joueurs[i].strategie.mise <= 0)
+		{
+			perror("corrupted data\n");
+			exit(-1);
+		}
+	}
 }
 
 //fonction stockant les information d'un joueur 
@@ -70,7 +88,7 @@ infoJeu lireEntree(int fichier){
 					perror("Corrupted file!\n");
 					exit(-1);
 				}
-				result.joueurs = calloc(result.nbrJoueurs, sizeof(joueur));
+				if(result.joueurs = calloc(result.nbrJoueurs, sizeof(joueur))<0) exit(-1);
 			} else {
 				if(result.nbrJoueurs-cmpt>=0){
 					result = lireEntreeJoueur(buf, result, cmpt-1);
@@ -83,6 +101,7 @@ infoJeu lireEntree(int fichier){
 		}
 		free(buf);
 	}
+	checkFile(result);
 	return result;
 }
 
@@ -118,6 +137,7 @@ void ecritureFichierSortie(playerInfo inforound,int i){
 		int fd;
 		char* path=malloc(sizeof(char)*30);
 		char *c=malloc(sizeof(char)*35);
+		if(path < 0 || c < 0) exit(-1);
 		sprintf(path,"./PlayerOutPutFile%d",i+1);
 		printf("writing to %s\n",path);
 		fd = open(path,O_TRUNC|O_CREAT|O_WRONLY,0600);
@@ -144,7 +164,6 @@ void ecritureFichierSortie(playerInfo inforound,int i){
 		close(fd);
 		free(path);
 		free(c);
-	
 }
 
 
