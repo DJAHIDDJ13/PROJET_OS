@@ -20,4 +20,4 @@ editeur:
 	
 clean:
 	rm -f *.o $(prog)
-	rm -f PlayerOutPutFile*
+	rm -f PlayerOutputFile*
