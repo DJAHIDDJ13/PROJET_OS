@@ -137,7 +137,7 @@ void ecritureFichierSortie(playerInfo inforound,int i){
 		char* path=malloc(sizeof(char)*30);
 		char *c=malloc(sizeof(char)*35);
 		sprintf(path,"./PlayerOutputFile%d",i+1);
-		printf("writing to %s\n",path);
+		printf("\twriting to %s\n",path);
 		fd = open(path,O_TRUNC|O_CREAT|O_WRONLY,0600);
 		if(fd<0){
 			perror("error");

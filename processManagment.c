@@ -40,7 +40,14 @@ int getCardsSum(int* cartes, int top){
 		else 
 			aceCount ++;
 	}
-	if(res + aceCount - 1 <= 10)
+	if(aceCount == 0)
+		return res;
+	else if(aceCount == 1){
+		if(res <= 10)
+			return res + 11;
+		else
+			return res + 1;
+	} else if(res + aceCount - 1 <= 10)
 		return res + aceCount + 10;
 	else
 		return res + aceCount;
@@ -151,17 +158,17 @@ int calc_win(int* cartesJoueur, int topJoueur, int *sommeJoueur, int sommeBanque
 	return 0;
 }
 
-// pour piocher la tour de la banque
+// pour piocher le tour de la banque
 // et pour calculer la somme des cartes de la banque
 void bank_turn(deck_t *deck, int* cartesBanque, int* topBanque, int *sommeBanque){
 	while((*sommeBanque) <= 16){
 		pushCard(cartesBanque, topBanque, deck);
 		(*sommeBanque) = getCardsSum(cartesBanque, *topBanque);
 	}
-	printf("banque:");
+	printf("\tbanque:");
 	for(int i=0; i<(*topBanque); i++)
 		printf("%c", cardIdToCard(cartesBanque[i]));
-	printf(";somme=%d\n", (*sommeBanque));
+	printf("\t;somme=%d\n", (*sommeBanque));
 }
 
 // la fonction principale de la banque
@@ -190,9 +197,10 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 	// compteur des mains jouee
 	int mainsJoue = 0;
 	// la boucle principale de la banque
-	// on joue tant qu'il y des joueurs en train de jouer et tant que on a pas attendu le nbrMains
+	// on joue tant qu'il y a des joueurs en train de jouer et tant qu'on a pas atteint le nbrMains
 	while(somme(playerStop, info.nbrJoueurs) < info.nbrJoueurs && mainsJoue < info.nbrMains){
 		initialize_round(info,deck,inP,outP,mises,jetons,playerStop);
+		printf("\t     ********************ROUND°%d********************\n",mainsJoue+1);
 		//initialisation des cartes joueurs et banque
 		for(int i=0; i<info.nbrJoueurs; i++){
 			tops[i] = 0;
@@ -236,7 +244,7 @@ void playBanque(infoJeu info, deck_t* deck, int *outP, int *inP, int **cartesJou
 				endGame = 0;
 		}
 		if(endGame){
-			printf("Ended game with %d players out\n", somme(playerStop, info.nbrJoueurs));
+			printf("\tEnded game with %d players out\n", somme(playerStop, info.nbrJoueurs));
 			free(sigs);
 			break;
 		}
@@ -318,11 +326,11 @@ void playJoueur(joueur info, int in, int out, int i){
 				read(in, cartes, sizeof(int)*22);
 				//affichage et calcul de somme
 				somme = getCardsSum(cartes, top);
-				printf("joueur%d:", i+1);
+				printf("\tjoueur%d:", i+1);
 				for(int j=0; j<top; j++){
 					printf("%c",cardIdToCard(cartes[j]));
 				}
-				printf(";somme=%d,jetons=%d,mise=%d\n", somme,info.nbrJetons, mise);
+				printf("\t;somme=%d,\tjetons=%d,\tmise=%d\n", somme,info.nbrJetons, mise);
 			}
 			//Envoi de signal d'arret de partie
 			int sig = 2;
@@ -394,7 +402,7 @@ void play(infoJeu info, deck_t *deck){
 	}
 	//l'execution pricipal de la banque
 	playBanque(info, deck, outP, inP, cartesJoueurs, tops);
-	printf("OUT\n");
+	printf("\tOUT\n");
 	//deallocation de memoire
 	freeMemory(info, cartesJoueurs, ChildPipe, ParentPipe, inP, outP, tops);
 }

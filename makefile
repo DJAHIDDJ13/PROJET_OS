@@ -19,5 +19,5 @@ editeur:
 	geany *.c *.h makefile &
 	
 clean:
-	rm -f *.o $(prog)
 	rm -f PlayerOutputFile*
+	rm -f *.o $(prog)
